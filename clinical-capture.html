@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Clinical Process Capture — Implanted Wisdom</title>
+<link rel="icon" href="favicon.png">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400;500&family=Courier+Prime:wght@400;700&display=swap');
+:root{
+  --espresso:#17110d; --espresso-deep:#100c09; --ink:#1E1612; --gold:#C9A96E; --gold-soft:#d9c099;
+  --teal:#245C5C; --cream:#F2EEE7; --cream-80:rgba(242,238,231,.85); --cream-60:rgba(242,238,231,.6);
+  --line:rgba(242,238,231,.12);
+  --display:'Cormorant Garamond', Georgia, serif; --body:'Jost', system-ui, sans-serif; --mono:'Courier Prime', monospace;
+  --easing:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--body);font-weight:300;font-size:17px;line-height:1.65;color:var(--cream);background:var(--espresso);-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--display);font-weight:400;line-height:1.15;color:var(--cream)}
+.wrap{max-width:820px;margin:0 auto;padding:0 22px}
+.label{font-weight:500;text-transform:uppercase;letter-spacing:.3em;font-size:.72rem;color:var(--gold)}
+
+header.hero{padding:76px 0 34px;text-align:center}
+header.hero h1{font-size:clamp(2.2rem,6vw,3.6rem)}
+header.hero h1 em{font-style:italic;color:var(--gold)}
+header.hero p.sub{max-width:560px;margin:16px auto 0;color:var(--cream-60);font-size:1rem}
+.instr{background:rgba(36,92,92,.22);border:1px solid rgba(36,92,92,.6);border-radius:14px;padding:22px 26px;margin:22px 0 10px;font-size:.98rem;color:var(--cream-80)}
+.instr b{color:var(--gold);font-weight:500}
+
+/* sticky progress */
+.topbar{position:sticky;top:0;z-index:40;background:rgba(23,17,13,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.topbar .in{max-width:820px;margin:0 auto;padding:10px 22px;display:flex;align-items:center;gap:16px;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:var(--cream-60)}
+.topbar .track{flex:1;height:4px;background:rgba(242,238,231,.1);border-radius:99px;overflow:hidden}
+.topbar .fill{height:100%;width:0;background:var(--gold);transition:width .4s var(--easing)}
+.topbar .cnt{font-family:var(--mono);color:var(--gold);letter-spacing:.05em;white-space:nowrap}
+
+/* about */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px 20px}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}}
+.field label{display:block;font-size:.9rem;margin-bottom:6px;color:var(--cream-80)}
+.field input[type=text],.field input[type=email],textarea{width:100%;padding:12px 14px;border:1px solid rgba(242,238,231,.2);border-radius:8px;font-family:var(--body);font-size:.98rem;background:rgba(0,0,0,.24);color:var(--cream)}
+.field input:focus,textarea:focus{outline:none;border-color:var(--gold)}
+textarea{min-height:70px;resize:vertical}
+
+/* sections & questions */
+section.block{background:rgba(242,238,231,.045);border-radius:16px;margin:26px 0;padding:32px 36px}
+@media(max-width:640px){section.block{padding:24px 18px}}
+.secnum{font-family:var(--mono);color:var(--gold);font-size:.82rem;letter-spacing:.12em}
+section.block h2{font-size:1.65rem;margin:4px 0 6px}
+section.block .hint{color:var(--cream-60);font-size:.92rem;margin-bottom:8px}
+.q{padding:22px 0;border-top:1px solid var(--line)}
+.q:first-of-type{border-top:none}
+.q.missing{box-shadow:inset 3px 0 0 #c9705a;padding-left:14px;margin-left:-14px;border-radius:4px}
+.q .qt{display:flex;gap:12px;align-items:baseline;margin-bottom:12px;font-size:1.05rem;color:var(--cream)}
+.q .qn{font-family:var(--mono);color:var(--gold);font-size:.85rem;flex-shrink:0;min-width:28px}
+.choices{display:flex;flex-direction:column;gap:8px}
+.choices label{display:flex;align-items:flex-start;gap:12px;border:1px solid rgba(242,238,231,.18);border-radius:10px;padding:11px 16px;cursor:pointer;font-size:.96rem;transition:all .2s var(--easing);color:var(--cream-80)}
+.choices label:hover{border-color:var(--gold)}
+.choices label:has(input:checked){background:var(--gold);color:var(--ink);border-color:var(--gold);font-weight:400}
+.choices label .lt{font-family:var(--mono);font-size:.82rem;min-width:16px;padding-top:2px;opacity:.85}
+.choices input{position:absolute;opacity:0;width:0;height:0}
+.choices.multi label:has(input:checked){background:rgba(201,169,110,.14);color:var(--cream);border-color:var(--gold)}
+.notewrap{margin-top:12px}
+.notebtn{background:none;border:none;color:var(--cream-60);font-family:var(--body);font-size:.82rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;padding:4px 0}
+.notebtn:hover{color:var(--gold)}
+.notewrap textarea{display:none;margin-top:8px}
+.notewrap.open textarea{display:block}
+.notewrap.open .notebtn{color:var(--gold)}
+.otherline{margin-top:10px}
+
+/* submit */
+.submitrow{text-align:center;padding:10px 0 80px}
+.btn{display:inline-block;font-family:var(--body);font-weight:500;letter-spacing:.22em;text-transform:uppercase;font-size:.84rem;padding:18px 44px;border-radius:10px;border:none;cursor:pointer;transition:all .3s var(--easing);margin:6px}
+.btn-gold{background:var(--gold);color:var(--ink)}
+.btn-gold:hover{background:var(--gold-soft);transform:translateY(-1px)}
+.btn-line{background:transparent;border:1.5px solid var(--gold);color:var(--gold);padding:14px 28px}
+.btn-line:hover{background:rgba(201,169,110,.1)}
+.err{color:#e8a598;font-size:.92rem;margin-top:14px;display:none}
+.small{color:var(--cream-60);font-size:.86rem;margin-top:16px;max-width:520px;margin-left:auto;margin-right:auto}
+.saved{font-family:var(--mono);font-size:.75rem;color:var(--cream-60);letter-spacing:.08em}
+#done{display:none;text-align:left;background:rgba(36,92,92,.22);border:1px solid rgba(36,92,92,.6);border-radius:14px;padding:26px 30px;margin:20px auto;max-width:640px;font-size:.98rem}
+#done h3{font-size:1.5rem;margin-bottom:8px}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="in"><span>Progress</span><div class="track"><div class="fill" id="fill"></div></div><span class="cnt" id="cnt">0 / 75</span><span class="saved" id="savedtag"></span></div></div>
+
+<header class="hero"><div class="wrap">
+  <div class="label">Implanted Wisdom · Clinical Standards</div>
+  <h1>Dr. Pulver <em>Clinical Process Capture</em></h1>
+  <p class="sub">75 quick questions. This captures <em>how you actually decide</em> on a full-arch case so it can become the IW clinical system.</p>
+</div></header>
+
+<div class="wrap">
+  <div class="instr">
+    <b>How to fill this out:</b> Pick the answer closest to how you normally handle a full-arch case. If the answer depends on the patient, choose <b>"It depends"</b> and use <b>Add a note</b> to briefly say what determines the decision. Your answers save automatically in this browser, so you can stop and come back. When you finish, tap <b>Email My Answers</b> and hit send.
+  </div>
+
+  <section class="block">
+    <div class="secnum">00 / 12</div><h2>About you</h2>
+    <div class="grid2">
+      <div class="field"><label>Name</label><input type="text" id="p_name" value="Dr. Eric Pulver"></div>
+      <div class="field"><label>Date</label><input type="text" id="p_date"></div>
+    </div>
+  </section>
+
+  <div id="form"></div>
+
+  <div class="submitrow">
+    <button class="btn btn-gold" id="sendbtn">Email My Answers →</button>
+    <div class="err" id="err"></div>
+    <div id="done">
+      <h3>Your email should have opened.</h3>
+      <p>Just hit <b>Send</b>. If nothing opened, use one of the backups below — either copies everything to send to Skylar however is easiest.</p>
+    </div>
+    <div style="margin-top:12px">
+      <button class="btn btn-line" id="copybtn">Copy Answers</button>
+      <button class="btn btn-line" id="dlbtn">Download Answers (.txt)</button>
+    </div>
+    <p class="small">Answers go to Skylar. Nothing is stored anywhere except this browser until you send.</p>
+  </div>
+</div>
+
+<script>
+const TO = 'skylar@implantedwisdom.com';
+const SUBJECT = 'IW Clinical Process Capture — Dr. Pulver';
+const DEP = /depend|combination|other|explain/i;
+
+const SECTIONS = [
+{t:'Patient Selection & Initial Evaluation', q:[
+ ['What is the first thing you determine when evaluating a potential full-arch patient?',['Bone availability','Condition/prognosis of remaining teeth',"Patient's chief complaint/goals",'Medical history','Smile/aesthetic factors','Other']],
+ ['What most strongly determines whether you recommend full-arch treatment?',['Number of failing/missing teeth','Overall prognosis of remaining dentition','Bone condition','Patient goals/quality of life','Combination of these','Other']],
+ ['When teeth are questionable but potentially salvageable, what is your typical approach?',['Preserve whenever possible','Preserve only if long-term prognosis is strong','Compare prognosis of preservation vs. full-arch','Favor full-arch when multiple teeth are compromised','It depends']],
+ ['What finding is most likely to make you reconsider full-arch treatment?',['Medical risk','Insufficient bone','Unrealistic expectations','Poor compliance','Financial limitations','Other']],
+ ['How important is age in determining candidacy?',['Major factor','Moderate factor','Minor factor','Age itself is generally not important']],
+ ['How do you approach smokers?',['Do not treat','Require cessation','Strongly recommend cessation but may treat','Evaluate individually']],
+ ['How do you approach medically complex patients?',['Usually decline','Obtain medical clearance','Modify treatment based on condition','Refer when appropriate','Combination']],
+ ['What is the biggest patient-related predictor of a difficult case?',['Medical history','Bone loss','Bruxism','Poor compliance','Unrealistic expectations','Other']],
+]},
+{t:'Required Diagnostic Records', q:[
+ ['Which imaging do you consider mandatory before definitive planning?',['CBCT','Panoramic','CBCT + panoramic','Depends on case']],
+ ['Is an intraoral scan mandatory?',['Always','Usually','Only certain cases','No']],
+ ['Are clinical photographs mandatory?',['Always','Usually','Only aesthetic/complex cases','No']],
+ ['Which photographs should routinely be captured?',['Smile only','Smile + retracted','Smile + retracted + profile','Full standardized photo series','Other']],
+ ['When reviewing a CBCT, what do you evaluate FIRST?',['Bone volume','Anatomy/nerves/sinus','Pathology','Implant positions','Existing teeth','Other']],
+ ['Do you want records standardized across every IW practice?',['Yes — identical protocol','Mostly standardized','Surgeon discretion','Depends on case']],
+]},
+{t:'Diagnosis & Treatment Decision', q:[
+ ['What most influences whether remaining teeth should be removed?',['Periodontal prognosis','Restorability','Bone loss','Number/distribution of compromised teeth','Long-term predictability of entire dentition','Combination']],
+ ['How far into the future should the surgeon think when evaluating whether to save teeth?',['1–3 years','3–5 years','5–10 years','10+ years','Lifetime prognosis when possible']],
+ ['If one region has substantially worse bone than expected, what is your preferred response?',['Modify implant position','Graft','Change implant design','Stage treatment','Reconsider prosthetic design','Depends']],
+ ["How important is the patient's smile line in treatment planning?",['Critical','Very important','Moderate','Minor']],
+ ['How important is lip mobility?',['Critical','Very important','Moderate','Minor']],
+ ['How important is existing tissue volume?',['Critical','Very important','Moderate','Minor']],
+]},
+{t:'FP1 / FP2 / FP3 Decision', q:[
+ ['When clinically feasible, what restoration do you generally prefer?',['FP1','FP2','FP3','No default']],
+ ['What is the biggest factor determining whether FP1 is possible?',['Bone position','Tissue architecture','Smile line','Tooth position','Amount of required reduction','Combination']],
+ ['What most commonly eliminates FP1 as an option?',['Severe bone loss','Tissue loss','Required bone reduction','Smile line/aesthetic transition','Implant positioning','Other']],
+ ['When both FP1 and FP3 are technically possible, what should drive the decision?',['Long-term biological outcome','Esthetics','Cleansability','Surgical predictability','Patient preference','Combination']],
+ ['How aggressively should surgeons preserve bone when pursuing FP1?',['Maximum preservation whenever possible','Preserve unless reduction clearly improves outcome','Reduction is acceptable when it simplifies treatment','Case dependent']],
+ ['When should bone reduction be performed?',['Routinely for restorative space','Only when clinically necessary','Primarily for prosthetic transition','Based on restoration type','Other']],
+ ['Is FP1 something every IW surgeon should attempt?',['Yes','Only after training/competency','Only selected cases','No']],
+]},
+{t:'Implant Planning', q:[
+ ['What is your preferred number of implants per arch?',['4','5','6','More than 6','Depends on anatomy']],
+ ['What is more important: implant count or implant distribution?',['Count','Distribution','Equally important','Case dependent']],
+ ['What primarily determines implant position?',['Available bone','Prosthetic plan','Anatomy','Ideal tooth position','Combination']],
+ ['Should the prosthetic plan be established before final implant positioning?',['Always','Usually','Sometimes','Not necessary']],
+ ['When would you intentionally place more implants than minimally necessary?',['Poor bone quality','Bruxism/high forces','Long arch/span','Backup strategy','Multiple reasons','Rarely']],
+ ['How do you approach tilted implants?',['Avoid whenever possible','Use when anatomically beneficial','Routinely acceptable','Case dependent']],
+ ['When is grafting preferable to changing implant position?',['To preserve ideal prosthetic positioning','When stability is compromised','When long-term anatomy benefits','Rarely','Depends']],
+ ['Guided vs. freehand surgery?',['Primarily guided','Primarily freehand','Combination','Depends on complexity']],
+ ['How much should an IW surgeon be able to deviate from the preoperative plan intraoperatively?',['Very little','When anatomy requires it','Whenever clinical judgment indicates','Depends on surgeon experience']],
+]},
+{t:'Immediate Loading', q:[
+ ['What is the PRIMARY determinant of whether you immediately load?',['Insertion torque','ISQ','Bone quality','Implant distribution','Overall primary stability','Combination']],
+ ['Do you use a specific insertion torque threshold?',['Yes — always','Usually','Case dependent','No fixed threshold']],
+ ['Do you routinely use ISQ?',['Every implant','Selected implants','Difficult cases','Rarely/never']],
+ ['If one implant has poor primary stability but the others are strong, what do you usually do?',['Do not load the arch','Leave that implant unloaded','Replace/reposition it','Add another implant','Depends']],
+ ['What would most likely cause you to abandon immediate loading?',['Poor overall stability','Poor bone quality','Inadequate implant distribution','Unexpected surgical complication','Combination']],
+ ['Who should make the final immediate-load decision?',['Surgeon','Restorative dentist','Surgeon + restorative dentist','Team protocol']],
+]},
+{t:'Surgery-Day Protocol', q:[
+ ['What must be confirmed immediately before surgery begins?',['Prosthetic plan','Implant plan','Medical status','Records/components','All of the above']],
+ ['Should IW use a standardized surgical timeout/checklist?',['Yes — mandatory','Recommended','Surgeon-specific','Not necessary']],
+ ['Should there be defined checkpoints during surgery?',['Yes — mandatory','Only complex cases','Surgeon discretion','No']],
+ ['At what point should implant position be verified against the restorative plan?',['Before osteotomy','During osteotomy','Before final seating','Multiple checkpoints']],
+ ['Who should have authority to flag a potential problem during the procedure?',['Surgeon only','Surgeon + restorative doctor','Any trained clinical team member','Depends']],
+ ['Should the surgical team have a predefined backup plan before starting?',['Every case','Complex cases','Rarely','No']],
+]},
+{t:'Provisional Prosthesis', q:[
+ ['What is the MOST important requirement of the immediate provisional?',['Passive fit','Occlusion','Esthetics','Strength','Tissue relationship','Combination']],
+ ['Who gives final approval before the provisional is delivered?',['Surgeon','Restorative dentist','Lab','Surgeon + restorative dentist','Patient + clinical team']],
+ ['How aggressively should occlusion be adjusted immediately after surgery?',['Very conservative/light','Standard functional occlusion','Depends on implant stability','Depends on opposing dentition']],
+ ['Should the patient approve tooth appearance before finalizing the provisional?',['Always','Usually','Only when changes are possible','No']],
+ ['What would make you reject/remake a provisional before the patient leaves?',['Poor passive fit','Poor occlusion','Major aesthetic issue','Structural concern','Any of these']],
+]},
+{t:'Post-Operative Protocol', q:[
+ ['When should the first postoperative evaluation occur?',['24–48 hours','3–7 days','1–2 weeks','Other']],
+ ['What is most important at the first postoperative visit?',['Healing','Occlusion','Prosthesis stability','Hygiene','All of the above']],
+ ['Should IW have a standardized diet progression?',['Yes','General guidelines with surgeon discretion','Completely case-specific','No']],
+ ['Should IW have standardized hygiene instructions?',['Yes — identical','Standard baseline + case modifications','Surgeon-specific','No']],
+ ['What should trigger an unscheduled postoperative evaluation?',['Persistent pain','Swelling','Prosthetic movement','Bite change','Bleeding/drainage','Any of these']],
+ ['How frequently should implant stability be reassessed before final restoration?',['Every visit','At defined milestones','Only if concerned','Other']],
+]},
+{t:'Transition to Final Prosthesis', q:[
+ ['What primarily determines when a patient is ready for the final prosthesis?',['Time since surgery','Osseointegration/stability','Tissue healing','Patient adaptation','All of the above']],
+ ['Do you use a minimum healing period before final restoration?',['Yes — fixed','General minimum with exceptions','Completely case dependent','No']],
+ ['What should be confirmed before beginning the final prosthesis?',['Implant stability','Healthy tissue','Stable occlusion','Patient satisfaction with design','All']],
+ ['How much should the provisional inform the final design?',['Almost entirely','Strongly','Somewhat','Final is redesigned independently']],
+ ['What defines a clinically completed IW case?',['Final prosthesis delivered','Final prosthesis + confirmed fit/occlusion','Stable implants + healthy tissue + functional/aesthetic success','Completion of defined follow-up period']],
+]},
+{t:'Complications & Backup Decisions', q:[
+ ['If an implant fails during healing, what is your typical first approach?',['Replace immediately','Remove and graft','Allow healing and replace later','Determine whether remaining implants are sufficient','Depends']],
+ ['If bone is substantially worse than anticipated during surgery, what comes first?',['Change implant position','Graft','Change implant size/design','Stage treatment','Reassess entire plan']],
+ ['If the provisional fractures, what should the team evaluate FIRST?',['Material thickness','Occlusion','Patient compliance/diet','Implant/prosthesis fit','Cause of fracture broadly']],
+ ['If the patient dislikes the aesthetics but everything is clinically successful, what is your approach?',['Modify provisional until expectations align','Move forward and adjust final','Reassess expectations/design completely','Case dependent']],
+ ['If the planned FP1 becomes impossible intraoperatively, what is the preferred backup?',['Convert to FP3','Graft/stage to preserve FP1','Modify surgical plan','Stop and reassess','Depends on why FP1 became impossible']],
+ ['Should IW create standardized complication algorithms?',['Yes — mandatory','Yes, but surgeon judgment overrides','Only for common complications','No']],
+]},
+{t:'The "Eric Pulver Rules"', hint:'These last five matter most — they capture what makes the IW protocol yours.', q:[
+ ['What is the biggest mistake surgeons make in full-arch treatment?',['Poor patient selection','Prosthetically incorrect implant positioning','Excessive bone reduction','Poor surgical execution','Poor restorative planning','Poor complication management','Other']],
+ ['What should an IW surgeon prioritize above everything else?',['Surgical safety','Long-term predictability','Bone/tissue preservation','Prosthetic outcome','Patient experience','Combination']],
+ ['Which philosophy best describes your approach?',['Simplify the surgery whenever possible','Preserve anatomy whenever possible','Start with the desired final restoration and work backward','Maximize long-term predictability even if treatment becomes more complex','Combination — explain']],
+ ['How standardized should the IW clinical protocol ultimately be?',['Surgeons follow it almost exactly','Standard protocol with defined exceptions','Standard principles with significant surgeon discretion','Primarily educational guidance']],
+ ['What are the FIVE things you would never allow an IW surgeon to compromise on? (Choose up to five)',['Patient selection','Medical safety','Diagnostic records','Treatment planning','Bone preservation','Soft-tissue management','Implant positioning','Primary stability','Prosthetically driven surgery','Passive prosthetic fit','Occlusion','Esthetics','Hygiene/cleansability','Follow-up','Patient expectations','Knowing when not to proceed','Other'], 'multi'],
+]},
+];
+
+const L='ABCDEFGHIJKLMNOPQ';
+const Q=[]; // flat list
+let html='', n=0;
+SECTIONS.forEach((s,si)=>{
+  html+=`<section class="block"><div class="secnum">${String(si+1).padStart(2,'0')} / 12</div><h2>${s.t}</h2>${s.hint?`<p class="hint">${s.hint}</p>`:''}`;
+  s.q.forEach(([text,opts,multi])=>{
+    n++; Q.push({n,text,opts,multi:!!multi});
+    html+=`<div class="q" id="q${n}"><div class="qt"><span class="qn">${n}.</span><span>${text}</span></div><div class="choices${multi?' multi':''}">`;
+    opts.forEach((o,i)=>{
+      html+=`<label><input type="${multi?'checkbox':'radio'}" name="q${n}" value="${L[i]}"><span class="lt">${L[i]}.</span><span>${o}</span></label>`;
+    });
+    html+=`</div>`;
+    if(multi) html+=`<div class="field otherline"><input type="text" id="o${n}" placeholder="Other — type here"></div>`;
+    html+=`<div class="notewrap" id="nw${n}"><button type="button" class="notebtn" data-n="${n}">+ Add a note</button><textarea id="note${n}" placeholder="What determines the decision?"></textarea></div></div>`;
+  });
+  html+='</section>';
+});
+document.getElementById('form').innerHTML=html;
+
+// date default
+const d=new Date(); document.getElementById('p_date').value=d.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+
+// notes toggle
+document.querySelectorAll('.notebtn').forEach(b=>b.addEventListener('click',()=>{
+  const w=document.getElementById('nw'+b.dataset.n); w.classList.toggle('open');
+  if(w.classList.contains('open')) document.getElementById('note'+b.dataset.n).focus();
+}));
+
+function answered(q){ return !!document.querySelector(`input[name="q${q.n}"]:checked`); }
+function update(){
+  const c=Q.filter(answered).length;
+  document.getElementById('cnt').textContent=c+' / '+Q.length;
+  document.getElementById('fill').style.width=(c/Q.length*100)+'%';
+}
+const KEY='iw_clinical_capture_v1';
+function save(){
+  const data={name:v('p_name'),date:v('p_date'),a:{},notes:{},other:{}};
+  Q.forEach(q=>{
+    const sel=[...document.querySelectorAll(`input[name="q${q.n}"]:checked`)].map(i=>i.value);
+    if(sel.length) data.a[q.n]=sel;
+    const nt=v('note'+q.n); if(nt) data.notes[q.n]=nt;
+    if(q.multi){const o=v('o'+q.n); if(o) data.other[q.n]=o;}
+  });
+  try{localStorage.setItem(KEY,JSON.stringify(data)); document.getElementById('savedtag').textContent='saved';}catch(e){}
+}
+function v(id){const e=document.getElementById(id);return e?e.value.trim():'';}
+function load(){
+  let data; try{data=JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){}
+  if(!data) return;
+  if(data.name) document.getElementById('p_name').value=data.name;
+  if(data.date) document.getElementById('p_date').value=data.date;
+  Q.forEach(q=>{
+    (data.a[q.n]||[]).forEach(val=>{const i=document.querySelector(`input[name="q${q.n}"][value="${val}"]`); if(i) i.checked=true;});
+    if(data.notes[q.n]){document.getElementById('note'+q.n).value=data.notes[q.n]; document.getElementById('nw'+q.n).classList.add('open');}
+    if(q.multi&&data.other[q.n]) document.getElementById('o'+q.n).value=data.other[q.n];
+  });
+}
+load(); update();
+
+document.getElementById('form').addEventListener('change',e=>{
+  const inp=e.target; if(!inp.name) return;
+  const num=+inp.name.slice(1); const q=Q[num-1];
+  if(q.multi){
+    const sel=document.querySelectorAll(`input[name="q${num}"]:checked`);
+    if(sel.length>5){inp.checked=false; alert('Choose up to five.');}
+  } else {
+    const txt=q.opts[L.indexOf(inp.value)];
+    if(DEP.test(txt)){document.getElementById('nw'+num).classList.add('open');}
+  }
+  document.getElementById('q'+num).classList.remove('missing');
+  update(); save();
+});
+document.getElementById('form').addEventListener('input',()=>save());
+['p_name','p_date'].forEach(id=>document.getElementById(id).addEventListener('input',save));
+
+function buildText(){
+  let out=`IW CLINICAL PROCESS CAPTURE\nName: ${v('p_name')}\nDate: ${v('p_date')}\n`;
+  let si=0, count=0;
+  SECTIONS.forEach((s,i)=>{
+    out+=`\n== ${i+1}. ${s.t.toUpperCase()} ==\n`;
+    s.q.forEach(()=>{
+      count++; const q=Q[count-1];
+      const sel=[...document.querySelectorAll(`input[name="q${q.n}"]:checked`)].map(x=>x.value);
+      const ans=sel.length? sel.map(l=>l+'. '+q.opts[L.indexOf(l)]).join('; ') : '(no answer)';
+      out+=`${q.n}. ${ans}\n`;
+      if(q.multi&&v('o'+q.n)) out+=`   Other: ${v('o'+q.n)}\n`;
+      const nt=v('note'+q.n); if(nt) out+=`   Note: ${nt}\n`;
+    });
+  });
+  return out;
+}
+function validate(){
+  const miss=Q.filter(q=>!answered(q));
+  document.querySelectorAll('.q.missing').forEach(e=>e.classList.remove('missing'));
+  miss.forEach(q=>document.getElementById('q'+q.n).classList.add('missing'));
+  return miss;
+}
+document.getElementById('sendbtn').addEventListener('click',()=>{
+  const miss=validate(); const err=document.getElementById('err');
+  if(miss.length){
+    err.style.display='block'; err.textContent=`${miss.length} question${miss.length>1?'s':''} still unanswered — first one is #${miss[0].n}.`;
+    document.getElementById('q'+miss[0].n).scrollIntoView({behavior:'smooth',block:'center'}); return;
+  }
+  err.style.display='none';
+  const body=buildText();
+  location.href=`mailto:${TO}?subject=${encodeURIComponent(SUBJECT)}&body=${encodeURIComponent(body)}`;
+  document.getElementById('done').style.display='block';
+});
+document.getElementById('copybtn').addEventListener('click',async()=>{
+  const t=buildText();
+  try{await navigator.clipboard.writeText(t); document.getElementById('copybtn').textContent='Copied ✓';}
+  catch(e){ const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); document.getElementById('copybtn').textContent='Copied ✓'; }
+  setTimeout(()=>document.getElementById('copybtn').textContent='Copy Answers',2500);
+});
+document.getElementById('dlbtn').addEventListener('click',()=>{
+  const blob=new Blob([buildText()],{type:'text/plain'}); const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='IW_Clinical_Process_Capture_Pulver.txt'; a.click();
+});
+</script>
+</body>
+</html>
